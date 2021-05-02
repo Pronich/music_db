@@ -6,9 +6,10 @@ def get_creds():
     config.read("settings.ini")
     login = config['login']['login']
     password = config['password']['password']
-    return [login, password]
+    database = config['DB']['db_name']
+    return [login, password, database]
 
 if __name__ == '__main__':
     creds = get_creds()
-    insert_cl = Insert_data(creds, 'music')
+    insert_cl = Insert_data(creds)
     insert_cl.insert_to_db('music.csv')

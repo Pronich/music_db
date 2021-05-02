@@ -5,10 +5,9 @@ from pprint import pprint
 
 
 class Insert_data():
-    def __init__(self, creds, database):
+    def __init__(self, creds):
         self.creds = creds
-        self.database = database
-        db = f'postgresql://{self.creds[0]}:{self.creds[1]}@localhost:5432/{self.database}'
+        db = f'postgresql://{self.creds[0]}:{self.creds[1]}@localhost:5432/{self.creds[2]}'
         engine = sqlalchemy.create_engine(db)
         self.conn = engine.connect()
 
@@ -107,6 +106,18 @@ class Insert_data():
             self.conn.execute(insert, artist_id=artist_id, album_id=album_id)
         return
 
+    def check_track_coll(self, track_id, coll_id):
+        check = text('''
+        select * 
+        from track_collection
+        where track_id=:track_id and collection_id=:coll_id;''')
+        insert = text('''
+                    insert into track_collection (track_id, collection_id) values (:track_id, :coll_id)''')
+        cur = self.conn.execute(check, track_id=track_id, coll_id=coll_id).fetchall()
+        if cur == []:
+            self.conn.execute(insert, track_id=track_id, coll_id=coll_id)
+        return
+
     def insert_to_db(self, filename):
         data = self.open_file(filename)
         for i in range(1, len(data)):
@@ -120,6 +131,10 @@ class Insert_data():
             self.check_art_genr(artist_id, genre_id)
             self.check_art_alb(artist_id, album_id)
             insert = text('''
-                    insert into tracks (album_id, name, duration, collection_id)
-                    values (:album_id, :name, :duration, :coll_id)''')
-            self.conn.execute(insert, album_id=album_id, name=track_name, duration=duration, coll_id=coll_id)
+                    insert into track (album_id, name, duration)
+                    values (:album_id, :name, :duration)''')
+            self.conn.execute(insert, album_id=album_id, name=track_name, duration=duration)
+            check = text('''
+                    select id from track where name=:name''')
+            track_id = self.conn.execute(check, name=track_name).fetchall()[0][0]
+            self.check_track_coll(track_id, coll_id)
