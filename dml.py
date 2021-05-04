@@ -6,18 +6,18 @@ def get_creds():
     config = configparser.ConfigParser()
     config.read("settings.ini")
     login = config['login']['login']
-    password = config['password']['password']
-    return [login, password]
+    database = config['DB']['db_name']
+    return [login, password, database]
 
-def get_conn(creds, database):
-    db = f'postgresql://{creds[0]}:{creds[1]}@localhost:5432/{database}'
+def get_conn(creds):
+    db = f'postgresql://{creds[0]}:{creds[1]}@localhost:5432/{creds[2]}'
     engine = sqlalchemy.create_engine(db)
     conn = engine.connect()
     return conn
 
 if __name__ == '__main__':
     creds = get_creds()
-    conn = get_conn(creds, 'music')
+    conn = get_conn(creds)
 
     print('-----------')
     # название и год выхода альбомов, вышедших в 2018 году;

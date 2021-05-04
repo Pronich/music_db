@@ -12,4 +12,4 @@ def get_creds():
 if __name__ == '__main__':
     creds = get_creds()
     insert_cl = Insert_data(creds)
-    insert_cl.insert_to_db('music.csv')
+    insert_cl.insert_to_db('music2.csv')
